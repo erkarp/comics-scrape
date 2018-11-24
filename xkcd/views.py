@@ -21,4 +21,4 @@ def xkcds(request):
         item = { 'xkcd': xkcd, 'date': date, 'name': name, 'link': link }
         xkcds.append(item)
     
-    return JsonResponse(xkcds, safe=False)
+    return JsonResponse(xkcds[:100], safe=False)
