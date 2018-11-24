@@ -1,7 +1,7 @@
 import requests
 
 from bs4 import BeautifulSoup
-from django.http import HttpResponse
+from django.http import JsonResponse
 from django.views.generic.base import TemplateView
 
 
@@ -21,4 +21,4 @@ def xkcds(request):
         item = { 'xkcd': xkcd, 'date': date, 'name': name, 'link': link }
         xkcds.append(item)
     
-    return HttpResponse(xkcds)
+    return JsonResponse(xkcds, safe=False)
