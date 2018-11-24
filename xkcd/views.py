@@ -2,9 +2,10 @@ import requests
 
 from bs4 import BeautifulSoup
 from django.http import HttpResponse
+from django.views.generic.base import TemplateView
 
 
-def main(request):
+def xkcds(request):
     res = requests.get('https://xkcd.com/archive/')
     res.raise_for_status()
 
