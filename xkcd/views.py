@@ -1,24 +1,15 @@
-import requests
-
-from bs4 import BeautifulSoup
 from django.http import JsonResponse
-from django.views.generic.base import TemplateView
+from xkcd.models import Comic
 
 
 def xkcds(request):
-    res = requests.get('https://xkcd.com/archive/')
-    res.raise_for_status()
+    data = []
+    for comic in Comic.objects.order_by('-number')[:30]:
+        data.append({
+            'xkcd': comic.number,
+            'date': comic.published,
+            'name': comic.display_name,
+            'link': comic.img_filename,
+        })
 
-    archives = BeautifulSoup(res.text).find(id='middleContainer')
-    xkcds = []
-
-    for x in archives.find_all('a'):
-        xkcd = x.get('href').replace('/', '')
-        date = x.get('title')
-        name = x.text
-        link = name.lower().replace(' ', '_')
-        
-        item = { 'xkcd': xkcd, 'date': date, 'name': name, 'link': link }
-        xkcds.append(item)
-    
-    return JsonResponse(xkcds[:100], safe=False)
+    return JsonResponse(data, safe=False)
