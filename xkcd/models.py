@@ -6,4 +6,5 @@ class Comic(models.Model):
     published = models.DateField()
     display_name = models.CharField(max_length=100)
     img_filename = models.CharField(max_length=100)
+    description = models.TextField(blank=True)
     scraped = models.DateTimeField(auto_now=True)
