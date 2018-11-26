@@ -18,41 +18,53 @@ class Command(BaseCommand):
         latest_stored = stored_comics[0] if stored_comics else None
         comics = []
 
-        for comic in archives[:30]:
+        for comic in archives:
+            filename_base = img_filename = None
             number = comic.get('href').replace('/', '')
 
-            # print(f'number {number}')
             if latest_stored and latest_stored.number == comic.number:
                 break
 
-            try:
-                img_filename = comic.text.lower().replace(' ', '_')
-                img_link = f'https://imgs.xkcd.com/comics/{img_filename}.png'
-                img_res = requests.get(img_link)
-                img_res.raise_for_status()
-                print(f'Found xkcd {number} at {img_filename}')
+            for ext in ('png', 'jpg', 'gif'):
+                if img_filename:
+                    break
+                
+                try:
+                    filename_base = comic.text.lower().replace(' ', '_')
+                    img_link = f'https://imgs.xkcd.com/comics/{filename_base}.{ext}'
+                    
+                    img_res = requests.get(img_link)
+                    img_res.raise_for_status()
 
-            except requests.exceptions.HTTPError:
+                    img_filename = filename_base + '.' + ext
+                    print(f'Found xkcd {number} at {img_filename}')
+
+                except requests.exceptions.HTTPError:
+                    pass
+
+            if not filename_base:
                 xkcd_page_link = f'https://xkcd.com/{number}/'
                 xkcd_page_res = requests.get(xkcd_page_link)
                 xkcd_page_res.raise_for_status()
 
-                xkcd_page_soup = BeautifulSoup(xkcd_page_res.text, features="html.parser")
+                xkcd_page_soup = BeautifulSoup(xkcd_page_res.text, features='html.parser')
                 xkcd_page_middle = xkcd_page_soup.find(id='middleContainer')
 
                 try:
-                    permalink_pattern = 'https://imgs.xkcd.com/comics/(.+).png'
+                    permalink_pattern = 'https://imgs.xkcd.com/comics/(.+)$'
                     img_filename = re.search(permalink_pattern, xkcd_page_middle.text).group(1)
                     print(f'Found xkcd {number} at a custom location: {img_filename}')
 
                 except (requests.exceptions.HTTPError, AttributeError) as e:
                     print(f'xkcd {number} not found: {e}')
+                    continue
 
-            comics.append(Comic(
-                number = number,
-                published = comic.get('title'),
-                display_name = comic.text,
-                img_filename = img_filename,
-            ))
+            if img_filename:
+                comics.append(Comic(
+                    number = number,
+                    published = comic.get('title'),
+                    display_name = comic.text,
+                    img_filename = img_filename,
+                ))
 
         Comic.objects.bulk_create(comics)
