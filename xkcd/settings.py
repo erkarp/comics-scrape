@@ -31,6 +31,7 @@ ALLOWED_HOSTS = [
 
 CORS_ORIGIN_WHITELIST = (
     'localhost:8080',
+    'localhost:8081',
 )
 
 # Application definition
