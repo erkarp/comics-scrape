@@ -1,3 +1,4 @@
+import logging
 import os
 import re
 import requests
@@ -7,18 +8,22 @@ from django.core.management.base import BaseCommand
 from xkcd.models import Comic
 
 
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s -  %(message)s')
+
+
 class Command(BaseCommand):
     def handle(self, *args, **options):
         comics = []
         counter = 0
-
         stored_comics = Comic.objects.all().order_by('-published')
         latest_number = stored_comics[0].number if stored_comics else 0
 
+        # Get the xkcd homepage
         base_link = 'https://xkcd.com/'
         res = requests.get(base_link)
+        res.raise_for_status()
 
-        # Get the comic number
+        # Get the starting comic number
         page_soup = BeautifulSoup(res.text, features="html.parser")
         comic_number = re.search(r'(?<=https://xkcd.com/)\d+', page_soup.text).group(0)
 
@@ -35,7 +40,7 @@ class Command(BaseCommand):
             try:
                 img_res = requests.get(f'https://imgs.xkcd.com/comics/{basename}')
                 img_res.raise_for_status()
-                print(f'Downloading {basename}')
+                logging.info(f'Downloading {basename}')
 
                 # Save the image to ./xkcd. (from ATBS)
                 filepath = os.path.join('xkcd_imgs', basename)
@@ -45,7 +50,7 @@ class Command(BaseCommand):
                 img_file.close()
 
             except requests.exceptions.HTTPError:
-                print(f'Could not find xkcd {number}')
+                logging.info(f'Could not find xkcd {number}')
                 comic_number -= 1
                 continue
 
@@ -73,9 +78,18 @@ class Command(BaseCommand):
 
             # Save the date from the archive link to the comic object
             for i in range(len(comics)):
-                comics[i].published = link_list[i].get('title')
+                archive_link_number = int(link_list[i].get('href').replace('/', ''))
 
-            print('Saving downloaded comics')
+                if comics[i].number == archive_link_number:
+                    comics[i].published = link_list[i].get('title')
+                else:
+                    logging.error(f"""Abort: comic ids do not line up with archive links.
+                        downloaded comic: {comics[i].number}
+                        archive page link: {archive_link_number}
+                        Downloaded comics have not been recorded in the database.""")
+                    return
+
+            logging.info('Saving downloaded comics')
             Comic.objects.bulk_create(comics)
 
-        print('Comics are up to date.')
+        logging.info('Comics are up to date.')
