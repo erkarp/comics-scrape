@@ -1,3 +1,4 @@
+import os
 import re
 import requests
 
@@ -8,63 +9,60 @@ from xkcd.models import Comic
 
 class Command(BaseCommand):
     def handle(self, *args, **options):
-        res = requests.get('https://xkcd.com/archive/')
-        res.raise_for_status()
-
-        archive_soup = BeautifulSoup(res.text, features="html.parser")
-        archives = archive_soup.find(id='middleContainer').find_all('a')
-
-        stored_comics = Comic.objects.all().reverse()
-        latest_stored = stored_comics[0] if stored_comics else None
         comics = []
+        counter = 0
 
-        for comic in archives:
-            filename_base = img_filename = None
-            number = comic.get('href').replace('/', '')
+        stored_comics = Comic.objects.all().order_by('published')
+        latest_number = stored_comics[0] if stored_comics else 0
 
-            if latest_stored and latest_stored.number == comic.number:
-                break
+        base_link = 'https://xkcd.com/'
+        res = requests.get(base_link)
+        next_number = ''
 
-            for ext in ('png', 'jpg', 'gif'):
-                if img_filename:
-                    break
-                
-                try:
-                    filename_base = comic.text.lower().replace(' ', '_')
-                    img_link = f'https://imgs.xkcd.com/comics/{filename_base}.{ext}'
-                    
-                    img_res = requests.get(img_link)
-                    img_res.raise_for_status()
+        while latest_number is not next_number and counter < 5:
+            res = requests.get(f'{base_link}/{next_number}')
+            res.raise_for_status()
 
-                    img_filename = filename_base + '.' + ext
-                    print(f'Found xkcd {number} at {img_filename}')
+            # Parse the page and find the comic image element
+            page_soup = BeautifulSoup(res.text, features="html.parser")
+            img_elem = page_soup.find(id='comic').img
+            basename = os.path.basename(img_elem.get('src'))
 
-                except requests.exceptions.HTTPError:
-                    pass
+            # Save the comic image to the disk
+            try:
+                img_res = requests.get(f'https://imgs.xkcd.com/comics/{basename}')
+                img_res = requests.get(f'https://imgs.xkcd.com/comics/{basename}')
+                img_res.raise_for_status()
+                print(f'Downloading {basename}')
 
-            if not filename_base:
-                xkcd_page_link = f'https://xkcd.com/{number}/'
-                xkcd_page_res = requests.get(xkcd_page_link)
-                xkcd_page_res.raise_for_status()
+                # Save the image to ./xkcd. (from ATBS)
+                filepath = os.path.join('xkcd_imgs', basename)
+                img_file = open(filepath, 'wb')
+                for chunk in img_res.iter_content(100000):
+                    img_file.write(chunk)
+                img_file.close()
 
-                xkcd_page_soup = BeautifulSoup(xkcd_page_res.text, features='html.parser')
-                xkcd_page_middle = xkcd_page_soup.find(id='middleContainer')
+            except requests.exceptions.HTTPError:
+                print(f'Could not find xkcd {number}')
+                next_number -= 1
+                continue
 
-                try:
-                    permalink_pattern = 'https://imgs.xkcd.com/comics/(.+)$'
-                    img_filename = re.search(permalink_pattern, xkcd_page_middle.text).group(1)
-                    print(f'Found xkcd {number} at a custom location: {img_filename}')
+            if not next_number:
+                m = re.search(r'(?<=https://xkcd.com/)\d+', page_soup.text)
+                next_number = m.group(0)
 
-                except (requests.exceptions.HTTPError, AttributeError) as e:
-                    print(f'xkcd {number} not found: {e}')
-                    continue
+            # Save the comic data to the array to be persisted
+            comics.append(Comic(
+                number = int(next_number),
+                img_filename = basename,
+                display_name = img_elem.get('alt'),
+                description = img_elem.get('title'),
+            ))
 
-            if img_filename:
-                comics.append(Comic(
-                    number = number,
-                    published = comic.get('title'),
-                    display_name = comic.text,
-                    img_filename = img_filename,
-                ))
+            # Find the link to the next comic page
+            prev_link = page_soup.select('a[rel="prev"]')[0]
+            next_number = prev_link.get('href').replace('/', '')
+            counter += 1
 
+        print('Saving downloaded comics')
         Comic.objects.bulk_create(comics)
