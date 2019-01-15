@@ -64,5 +64,19 @@ class Command(BaseCommand):
             next_number = prev_link.get('href').replace('/', '')
             counter += 1
 
+        # Find the published date for each downloaded comic on the archives page
+        if comics:
+            res = requests.get(f'{base_link}/archive')
+            res.raise_for_status()
+
+            # Parse the page and find the comic image element
+            page_soup = BeautifulSoup(res.text, features="html.parser")
+            link_list = page_soup.find(id='middleContainer').find_all('a', limit=len(comics))
+
+            # Save the date from the archive link to the comic object
+            for i in range(len(comics)):
+                comics[i].published = link_list[i].get('title')
+                print(comics[i].published)
+
         print('Saving downloaded comics')
         Comic.objects.bulk_create(comics)
