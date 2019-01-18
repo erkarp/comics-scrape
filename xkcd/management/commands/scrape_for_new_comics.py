@@ -43,7 +43,7 @@ class Command(BaseCommand):
                 logging.info(f'Downloading {basename}')
 
                 # Save the image to ./xkcd. (from ATBS)
-                filepath = os.path.join('xkcd_imgs', basename)
+                filepath = os.path.join('site/xkcd/static/img', basename)
                 img_file = open(filepath, 'wb')
                 for chunk in img_res.iter_content(100000):
                     img_file.write(chunk)
