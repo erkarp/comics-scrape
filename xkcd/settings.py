@@ -26,7 +26,7 @@ SECRET_KEY = 'w#(q4w%49cmu==vy$a)4a8fajo=htk8)%2+9xceanh*+e8ef7^'
 DEBUG = True
 
 ALLOWED_HOSTS = [
-    '127.0.0.1',
+    '127.0.0.1', '0.0.0.0'
 ]
 
 CORS_ORIGIN_WHITELIST = (
@@ -86,10 +86,10 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'comics',
-        'USER': 'root',
-        'PASSWORD': 'root',
-        'HOST': 'localhost',
-        'PORT': '3006',
+        'USER': 'django_admin',
+        'PASSWORD': 'testpass',
+        'HOST': 'mysql',
+        'PORT': '3306',
     }
 }
 
