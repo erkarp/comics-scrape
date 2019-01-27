@@ -11,10 +11,18 @@ services:
       - "3306:3306"
   app:
     build: .
-    command: bash -c "while ! nc -w 1 -z mysql 3306; do sleep 0.1; done; ./manage.py migrate; ./manage.py scrape_for_new_comics; while :; do ./manage.py runserver 0.0.0.0:8000; sleep 1; done" 
+    command: gunicorn xkcd.wsgi:application --bind 0.0.0.0:8000
     volumes:
       - .:/code
-    ports:
-      - "8000:8000"
+    expose:
+      - 8000
     depends_on:
       - mysql
+    environment:
+      IN_DOCKER: 1
+  nginx:
+    build: nginx
+    ports:
+      - "1337:80"
+    depends_on:
+      - app
