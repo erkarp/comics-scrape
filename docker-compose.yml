@@ -11,9 +11,6 @@ services:
       - "3306:3306"
   app:
     build: .
-    command: gunicorn xkcd.wsgi:application --bind 0.0.0.0:8000
-    volumes:
-      - .:/code
     expose:
       - 8000
     depends_on:
