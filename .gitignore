@@ -3,3 +3,7 @@
 venv
 
 xkcd/static/*
+
+.vscode/*
+
+**/local_settings.py
