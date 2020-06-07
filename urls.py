@@ -22,6 +22,6 @@ from xkcd import views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('xkcds/', views.xkcds),
+    path('xkcd/', views.xkcds),
     path('', TemplateView.as_view(template_name='index.html')),
 ] 

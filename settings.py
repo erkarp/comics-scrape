@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'plants',
     'xkcd',
     'corsheaders'
 ]
@@ -56,7 +57,7 @@ MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
 ]
 
-ROOT_URLCONF = 'xkcd.urls'
+ROOT_URLCONF = 'urls'
 
 TEMPLATES = [
     {
