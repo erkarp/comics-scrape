@@ -1,21 +1,26 @@
 from django.contrib import admin
 
 # Register your models here.
-from plants.models import Plant, Species, Fertilizer, Lighting, Shop, Spot
+from plants.models import Plant, Species, Fertilizer, Lighting, Shop, Spot, Watering
+
+
+class WaterInline(admin.TabularInline):
+    model = Watering
+    extra = 0
 
 
 class PlantAdmin(admin.ModelAdmin):
     search_fields = ('species',)
-    list_display = ('species',)
-
-    # @staticmethod
-    # def nlg_about_truncated(instance):
-    #     return truncatechars(instance.nlg_about, 150)
+    inlines = [WaterInline]
 
 
 class SpeciesAdmin(admin.ModelAdmin):
     search_fields = ('name',)
-    list_display = ('name',)
+    list_display = ('name', 'count')
+
+    @staticmethod
+    def count(instance):
+        return instance.plant_set.count()
 
 
 class FertilizerAdmin(admin.ModelAdmin):

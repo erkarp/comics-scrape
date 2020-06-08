@@ -20,14 +20,15 @@ class Lighting(models.Model):
 class Species(models.Model):
     name = models.CharField(max_length=56)
     water_frequency = models.CharField(max_length=255)
-    fertilize_frequency = models.CharField(max_length=255)
-    fertilizer = models.ForeignKey(Fertilizer, on_delete=models.PROTECT)
+    fertilize_frequency = models.CharField(max_length=255, blank=True)
+    fertilizer = models.ForeignKey(Fertilizer, on_delete=models.PROTECT, blank=True, null=True)
     lighting = models.ForeignKey(Lighting, on_delete=models.PROTECT)
 
     def __str__(self):
         return self.name
 
     class Meta:
+        ordering = ['name']
         verbose_name_plural = 'species'
 
 
@@ -43,7 +44,7 @@ class Shop(models.Model):
     name = models.CharField(max_length=255)
     website = models.URLField(max_length=255, blank=True)
     location = models.URLField(max_length=255, blank=True)
-    closed_down = models.BooleanField
+    closed_down = models.BooleanField(default=False)
 
     def __str__(self):
         return self.name
@@ -53,8 +54,14 @@ class Plant(models.Model):
     species = models.ForeignKey(Species, on_delete=models.PROTECT)
     name = models.CharField(max_length=255, blank=True)
     spot = models.ForeignKey(Spot, on_delete=models.PROTECT)
-    shop = models.ForeignKey(Shop, on_delete=models.PROTECT)
+    shop = models.ForeignKey(Shop, on_delete=models.PROTECT, blank=True, null=True)
     purchase_date = models.DateField(default=date.today)
+
+    def __str__(self):
+        return self.name or self.species.name
+
+    class Meta:
+        ordering = ['name']
 
 
 class Image(models.Model):
@@ -68,10 +75,13 @@ class Image(models.Model):
 
 class Watering(models.Model):
     plant = models.ForeignKey(Plant, on_delete=models.CASCADE)
-    date = models.DateField(default=date.today)
-    fertilized = models.BooleanField
+    date = models.DateField(default=date.today, unique=True)
+    fertilized = models.BooleanField(default=False)
+
+    def __str__(self):
+        return str(self.date)
 
     class Meta:
-        ordering = ['date']
+        ordering = ['-date']
 
 
