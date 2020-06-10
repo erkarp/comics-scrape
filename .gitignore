@@ -5,5 +5,6 @@ venv
 xkcd/static/*
 
 .vscode/*
+.idea/*
 
 **/local_settings.py

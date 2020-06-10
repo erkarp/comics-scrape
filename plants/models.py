@@ -19,7 +19,8 @@ class Lighting(models.Model):
 
 class Species(models.Model):
     name = models.CharField(max_length=56)
-    water_frequency = models.CharField(max_length=255)
+    days_between_watering_min = models.SmallIntegerField()
+    days_between_watering_max = models.SmallIntegerField()
     fertilize_frequency = models.CharField(max_length=255, blank=True)
     fertilizer = models.ForeignKey(Fertilizer, on_delete=models.PROTECT, blank=True, null=True)
     lighting = models.ForeignKey(Lighting, on_delete=models.PROTECT)
@@ -52,16 +53,31 @@ class Shop(models.Model):
 
 class Plant(models.Model):
     species = models.ForeignKey(Species, on_delete=models.PROTECT)
-    name = models.CharField(max_length=255, blank=True)
+    display_name = models.CharField(max_length=255, blank=True)
     spot = models.ForeignKey(Spot, on_delete=models.PROTECT)
     shop = models.ForeignKey(Shop, on_delete=models.PROTECT, blank=True, null=True)
     purchase_date = models.DateField(default=date.today)
 
-    def __str__(self):
-        return self.name or self.species.name
+    @property
+    def name(self):
+        return self.display_name or self.species.name
 
-    class Meta:
-        ordering = ['name']
+    @property
+    def latest_watering_date(self):
+        return self.watering_set.first().date
+
+    @property
+    def next_watering_min(self):
+        if self.latest_watering_date:
+            return self.latest_watering_date.day + self.species.days_between_watering_min
+
+    @property
+    def next_watering_max(self):
+        if self.latest_watering_date:
+            return self.latest_watering_date.day + self.species.days_between_watering_max
+
+    def __str__(self):
+        return self.name
 
 
 class Image(models.Model):
@@ -83,5 +99,3 @@ class Watering(models.Model):
 
     class Meta:
         ordering = ['-date']
-
-

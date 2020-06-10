@@ -8,5 +8,5 @@ class PlantViewSet(viewsets.ModelViewSet):
     """
     API endpoint that allows plants to be viewed or edited.
     """
-    queryset = Plant.objects.all().order_by('name')
+    queryset = Plant.objects.all()  # .order_by('name')
     serializer_class = PlantSerializer
