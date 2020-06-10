@@ -1,6 +1,5 @@
 from django.contrib import admin
 
-# Register your models here.
 from plants.models import Plant, Species, Fertilizer, Lighting, Shop, Spot, Watering
 
 
