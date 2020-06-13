@@ -1,6 +1,6 @@
-from datetime import date
+import datetime
 
-from django.db import models
+from django.db import models, IntegrityError
 
 
 class Fertilizer(models.Model):
@@ -56,7 +56,7 @@ class Plant(models.Model):
     display_name = models.CharField(max_length=255, blank=True)
     spot = models.ForeignKey(Spot, on_delete=models.PROTECT)
     shop = models.ForeignKey(Shop, on_delete=models.PROTECT, blank=True, null=True)
-    purchase_date = models.DateField(default=date.today)
+    purchase_date = models.DateField(default=datetime.date.today)
 
     @property
     def name(self):
@@ -79,10 +79,32 @@ class Plant(models.Model):
     def __str__(self):
         return self.name
 
+    def record_multiple_watering(self, dates: str, date=None) -> (bool, str):
+        dates = dates.split(',')
+        watering_objects = []
+
+        for d in dates:
+            try:
+                date = datetime.datetime.strptime(d, '%B %d %Y')
+                watering = Watering(
+                    plant=self,
+                    date=date,
+                )
+                watering_objects.append(watering)
+
+            except ValueError:
+                return False, f'Bad date: {d}'
+
+            except IntegrityError:
+                return False, f'Already watered on {date}'
+
+        Watering.objects.bulk_create(watering_objects)
+        return True, f'Successfully watered {self} on {len(watering_objects)} dates!'
+
 
 class Image(models.Model):
     plant = models.ForeignKey(Plant, on_delete=models.CASCADE)
-    date = models.DateField(default=date.today)
+    date = models.DateField(default=datetime.date.today)
     src = models.ImageField(max_length=255)
 
     class Meta:
@@ -91,7 +113,7 @@ class Image(models.Model):
 
 class Watering(models.Model):
     plant = models.ForeignKey(Plant, on_delete=models.CASCADE)
-    date = models.DateField(default=date.today, unique=True)
+    date = models.DateField(default=datetime.date.today, unique=True)
     fertilized = models.BooleanField(default=False)
 
     def __str__(self):

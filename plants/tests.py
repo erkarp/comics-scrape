@@ -60,3 +60,15 @@ class PlantTests(APITestCase):
         response = self.client.post(reverse('water-plant'), data)
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
+    def test_water_plant__bulk(self):
+        data = {
+            "dates": "June 1 2005,June 2 2006,June 3 2007",
+            "plant": self.plant.id,
+        }
+        response = self.client.post(reverse('water-plant'), data)
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+    def test_record_multiple_watering(self):
+        success, message = self.plant.record_multiple_watering("June 1 2005,June 2 2006,June 3 2007")
+        self.assertTrue(success)
+        self.assertEqual(Watering.objects.filter(plant=self.plant.pk).count(), 4)
