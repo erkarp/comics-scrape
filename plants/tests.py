@@ -1,6 +1,7 @@
 import datetime
 
 from django.urls import reverse
+from rest_framework import status
 from rest_framework.test import APITestCase
 
 from plants.models import Plant, Species, Lighting, Spot, Watering
@@ -50,3 +51,12 @@ class PlantTests(APITestCase):
 
     def test_next_watering_max(self):
         self.assertEqual(self.plant.next_watering_max, 13)
+
+    def test_water_plant(self):
+        data = {
+            "date": datetime.date(2020, 6, 9),
+            "plant": self.plant.id,
+        }
+        response = self.client.post(reverse('water-plant'), data)
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+

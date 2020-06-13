@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from plants.models import Plant, Species
+from plants.models import Plant, Species, Watering
 
 
 class SpeciesSerializer(serializers.ModelSerializer):
@@ -15,3 +15,9 @@ class PlantSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Plant
         fields = ['species', 'name', 'latest_watering_date', 'next_watering_min', 'next_watering_max']
+
+
+class WateringSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Watering
+        fields = ['plant', 'date', 'fertilized']
