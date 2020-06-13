@@ -20,8 +20,8 @@ class PlantTests(APITestCase):
         species = Species(
             name='jade',
             lighting=lighting,
-            days_between_watering_min=3,
-            days_between_watering_max=5
+            days_between_watering_min=5,
+            days_between_watering_max=9
         )
         species.save()
 
@@ -47,10 +47,14 @@ class PlantTests(APITestCase):
         self.assertEqual(self.plant.latest_watering_date, self.watering.date)
 
     def test_next_watering_min(self):
-        self.assertEqual(self.plant.next_watering_min, 11)
+        water = Watering(plant=self.plant, date=(datetime.date.today() - datetime.timedelta(days=1)))
+        water.save()
+        self.assertEqual(self.plant.next_watering_min, (datetime.date.today() + datetime.timedelta(days=4)))
 
     def test_next_watering_max(self):
-        self.assertEqual(self.plant.next_watering_max, 13)
+        water = Watering(plant=self.plant, date=(datetime.date.today() - datetime.timedelta(days=1)))
+        water.save()
+        self.assertEqual(self.plant.next_watering_max, (datetime.date.today() + datetime.timedelta(days=8)))
 
     def test_water_plant(self):
         data = {
