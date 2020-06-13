@@ -64,7 +64,7 @@ class Plant(models.Model):
 
     @property
     def latest_watering_date(self):
-        return self.watering_set.first().date
+        return self.watered.first().date
 
     @property
     def next_watering_min(self):
@@ -79,7 +79,7 @@ class Plant(models.Model):
     def __str__(self):
         return self.name
 
-    def record_multiple_watering(self, dates: str, date=None) -> (bool, str):
+    def record_multiple_watering(self, dates: str) -> (bool, str):
         dates = dates.split(',')
         watering_objects = []
 
@@ -100,7 +100,11 @@ class Plant(models.Model):
             return True, f'Successfully watered {self} on {len(watering_objects)} dates!'
 
         except IntegrityError as e:
-            dupe_date = str(e).split("'")[1]
+            # Error message: Duplicate entry '1-2005-06-01' for key 'plants_watering_plant_id_date_b12f1322_uniq'
+            # Where "1" is the plant id. Extract the date.
+            dupe_plant_date = str(e).split("'")[1]
+            dupe_date_parts = dupe_plant_date.split('-')[1:]
+            dupe_date = '-'.join(dupe_date_parts)
             return False, f'Already watered on {dupe_date}'
 
 
@@ -114,8 +118,8 @@ class Image(models.Model):
 
 
 class Watering(models.Model):
-    plant = models.ForeignKey(Plant, on_delete=models.CASCADE)
-    date = models.DateField(default=datetime.date.today, unique=True)
+    plant = models.ForeignKey(Plant, related_name='watered', on_delete=models.CASCADE)
+    date = models.DateField(default=datetime.date.today)
     fertilized = models.BooleanField(default=False)
 
     def __str__(self):
@@ -123,3 +127,4 @@ class Watering(models.Model):
 
     class Meta:
         ordering = ['-date']
+        unique_together = ['plant', 'date']

@@ -17,22 +17,21 @@ class PlantViewSet(viewsets.ModelViewSet):
 
 @api_view(['POST'])
 def water_plant(request):
+    if 'dates' in request.data:
+        plant = Plant.objects.get(pk=request.data['plant'])
+        success, message = plant.record_multiple_watering(request.data['dates'])
+
+        if success:
+            return Response(message, status=status.HTTP_201_CREATED)
+        else:
+            return Response(message, status=status.HTTP_400_BAD_REQUEST)
+
     serializer = WateringSerializer(data=request.data)
     if serializer.is_valid():
-        if 'dates' in request.data:
-            plant = Plant.objects.get(pk=request.data['plant'])
-            success, message = plant.record_multiple_watering(request.data['dates'])
-
-            if success:
-                return Response(message, status=status.HTTP_201_CREATED)
-            else:
-                return Response(message, status=status.HTTP_400_BAD_REQUEST)
-
-        else:
-            try:
-                serializer.save()
-                return Response(serializer.data, status=status.HTTP_201_CREATED)
-            except IntegrityError:
-                return Response(serializer.errors, status=status.HTTP_405_METHOD_NOT_ALLOWED)
+        try:
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        except IntegrityError:
+            return Response(serializer.errors, status=status.HTTP_405_METHOD_NOT_ALLOWED)
 
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
