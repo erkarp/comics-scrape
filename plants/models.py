@@ -95,11 +95,13 @@ class Plant(models.Model):
             except ValueError:
                 return False, f'Bad date: {d}'
 
-            except IntegrityError:
-                return False, f'Already watered on {date}'
+        try:
+            Watering.objects.bulk_create(watering_objects)
+            return True, f'Successfully watered {self} on {len(watering_objects)} dates!'
 
-        Watering.objects.bulk_create(watering_objects)
-        return True, f'Successfully watered {self} on {len(watering_objects)} dates!'
+        except IntegrityError as e:
+            dupe_date = str(e).split("'")[1]
+            return False, f'Already watered on {dupe_date}'
 
 
 class Image(models.Model):

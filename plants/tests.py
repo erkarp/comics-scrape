@@ -72,3 +72,22 @@ class PlantTests(APITestCase):
         success, message = self.plant.record_multiple_watering("June 1 2005,June 2 2006,June 3 2007")
         self.assertTrue(success)
         self.assertEqual(Watering.objects.filter(plant=self.plant.pk).count(), 4)
+
+    def test_record_multiple_watering__bad_date(self):
+        success, message = self.plant.record_multiple_watering("June 1 2005,June 2 2006,bad date")
+
+        self.assertFalse(success)
+        self.assertEqual(message, 'Bad date: bad date')
+
+    def test_record_multiple_watering__already_watered(self):
+        self.plant.record_multiple_watering("June 1 2005")
+        success, message = self.plant.record_multiple_watering("June 1 2005,June 2 2006,June 3 2007")
+
+        self.assertFalse(success)
+        self.assertEqual(message, 'Already watered on 2005-06-01')
+
+    def test_record_multiple_watering__duplicate_input_data(self):
+        success, message = self.plant.record_multiple_watering("June 1 2005,June 2 2006,June 2 2006")
+
+        self.assertFalse(success)
+        self.assertEqual(message, 'Already watered on 2006-06-02')
