@@ -76,6 +76,10 @@ class Plant(models.Model):
         if self.latest_watering_date:
             return self.latest_watering_date + datetime.timedelta(days=self.species.days_between_watering_max)
 
+    @property
+    def time_till_next_watering(self):
+        return -(datetime.date.today() - self.next_watering_max).days
+
     def __str__(self):
         return self.name
 

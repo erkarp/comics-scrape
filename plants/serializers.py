@@ -21,4 +21,5 @@ class PlantSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Plant
-        fields = ['species', 'watered', 'name', 'latest_watering_date', 'next_watering_min', 'next_watering_max']
+        fields = ['species', 'watered', 'name', 'latest_watering_date', 'next_watering_min', 'next_watering_max',
+                  'time_till_next_watering']

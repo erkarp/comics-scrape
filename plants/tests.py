@@ -56,6 +56,11 @@ class PlantTests(APITestCase):
         water.save()
         self.assertEqual(self.plant.next_watering_max, (datetime.date.today() + datetime.timedelta(days=8)))
 
+    def test_time_till_next_watering(self):
+        water = Watering(plant=self.plant, date=(datetime.date.today() - datetime.timedelta(days=1)))
+        water.save()
+        self.assertEqual(self.plant.time_till_next_watering, 8)
+
     def test_water_plant(self):
         data = {
             "date": datetime.date(2020, 6, 9),
