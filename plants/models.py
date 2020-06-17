@@ -24,7 +24,7 @@ class Species(models.Model):
     days_between_watering_max = models.SmallIntegerField()
     fertilize_frequency = models.CharField(max_length=255, blank=True)
     fertilizer = models.ForeignKey(Fertilizer, on_delete=models.PROTECT, blank=True, null=True)
-    lighting = models.ForeignKey(Lighting, on_delete=models.PROTECT)
+    lighting = models.ForeignKey(Lighting, related_name="lighting", on_delete=models.PROTECT)
 
     def __str__(self):
         return self.name

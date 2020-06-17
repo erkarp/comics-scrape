@@ -4,9 +4,11 @@ from plants.models import Plant, Species, Watering
 
 
 class SpeciesSerializer(serializers.ModelSerializer):
+    lighting = serializers.StringRelatedField()
+
     class Meta:
         model = Species
-        fields = ['days_between_watering_min', 'days_between_watering_max']
+        fields = ['days_between_watering_min', 'days_between_watering_max', 'lighting']
 
 
 class WateringSerializer(serializers.ModelSerializer):
