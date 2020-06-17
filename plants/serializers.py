@@ -15,13 +15,22 @@ class WateringSerializer(serializers.ModelSerializer):
         fields = ['plant', 'date', 'fertilized']
 
 
-class PlantSerializer(serializers.ModelSerializer):
+class PlantListSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Plant
+        fields = ['id', 'name', 'latest_watering_date',
+                  'next_watering_min', 'next_watering_max',
+                  'days_till_next_watering_min', 'days_till_next_watering_max',
+                  'time_till_next_watering']
+
+
+class PlantViewSerializer(serializers.ModelSerializer):
     species = SpeciesSerializer()
     watered = serializers.StringRelatedField(many=True)
 
     class Meta:
         model = Plant
-        fields = ['species', 'watered', 'name', 'latest_watering_date',
+        fields = ['id', 'species', 'watered', 'name', 'latest_watering_date',
                   'next_watering_min', 'next_watering_max',
                   'days_till_next_watering_min', 'days_till_next_watering_max',
                   'time_till_next_watering']

@@ -4,7 +4,7 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 
 from plants.models import Plant
-from plants.serializers import PlantSerializer, WateringSerializer
+from plants.serializers import WateringSerializer, PlantListSerializer, PlantViewSerializer
 
 
 class PlantViewSet(viewsets.ModelViewSet):
@@ -12,7 +12,12 @@ class PlantViewSet(viewsets.ModelViewSet):
     API endpoint that allows plants to be viewed or edited.
     """
     queryset = Plant.objects.all()  # .order_by('name')
-    serializer_class = PlantSerializer
+
+    def get_serializer_class(self):
+        if self.action == 'list':
+            return PlantListSerializer
+        else:
+            return PlantViewSerializer
 
 
 @api_view(['POST'])
