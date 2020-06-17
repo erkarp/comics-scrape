@@ -55,7 +55,7 @@ class Shop(models.Model):
 class Plant(models.Model):
     species = models.ForeignKey(Species, on_delete=models.PROTECT)
     display_name = models.CharField(max_length=255, blank=True)
-    spot = models.ForeignKey(Spot, on_delete=models.PROTECT)
+    spot = models.ForeignKey(Spot, related_name="spot", on_delete=models.PROTECT)
     shop = models.ForeignKey(Shop, on_delete=models.PROTECT, blank=True, null=True)
     purchase_date = models.DateField(default=datetime.date.today)
 

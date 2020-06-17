@@ -27,10 +27,11 @@ class PlantListSerializer(serializers.ModelSerializer):
 class PlantViewSerializer(serializers.ModelSerializer):
     species = SpeciesSerializer()
     watered = serializers.StringRelatedField(many=True)
+    spot = serializers.StringRelatedField()
 
     class Meta:
         model = Plant
-        fields = ['id', 'species', 'watered', 'name', 'latest_watering_date',
+        fields = ['id', 'species', 'watered', 'name', 'spot', 'latest_watering_date',
                   'next_watering_min', 'next_watering_max',
                   'days_till_next_watering_min', 'days_till_next_watering_max',
                   'time_till_next_watering']
