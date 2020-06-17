@@ -9,7 +9,7 @@ class WaterInline(admin.TabularInline):
 
 
 class PlantAdmin(admin.ModelAdmin):
-    search_fields = ('species',)
+    search_fields = ('display_name', 'species__name')
     inlines = [WaterInline]
 
 

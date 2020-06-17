@@ -1,6 +1,7 @@
 import datetime
 
 from django.db import models, IntegrityError
+from django.utils import timezone
 
 
 class Fertilizer(models.Model):
@@ -137,7 +138,7 @@ class Image(models.Model):
 
 class Watering(models.Model):
     plant = models.ForeignKey(Plant, related_name='watered', on_delete=models.CASCADE)
-    date = models.DateField(default=datetime.date.today)
+    date = models.DateField(default=timezone.now)
     fertilized = models.BooleanField(default=False)
 
     def __str__(self):
