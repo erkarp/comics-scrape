@@ -3,12 +3,18 @@ import os
 import re
 import requests
 
+from boto3 import session
+from boto3.s3.transfer import S3Transfer
 from bs4 import BeautifulSoup
 from django.core.management.base import BaseCommand
+
+from local_settings import AWS_ACCESS_KEY, AWS_SECRET_ACCESS_KEY, AWS_SPACES_URL, TEMP_IMAGE_DIRECTORY
 from xkcd.models import Comic
 
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s -  %(message)s')
+
+AWS_SPACES_BUCKET = 'comic'
 
 
 class Command(BaseCommand):
@@ -27,7 +33,12 @@ class Command(BaseCommand):
         page_soup = BeautifulSoup(res.text, features="html.parser")
         comic_number = re.search(r'(?<=https://xkcd.com/)\d+', page_soup.text).group(0)
 
-        while str(latest_number) != comic_number and counter < 5:
+        client = session.Session().client('s3', region_name='sfo2', endpoint_url=AWS_SPACES_URL,
+                                          aws_access_key_id=AWS_ACCESS_KEY,
+                                          aws_secret_access_key=AWS_SECRET_ACCESS_KEY)
+        transfer = S3Transfer(client)
+
+        while str(latest_number) != comic_number and counter < 20:
             res = requests.get(f'{base_link}/{comic_number}')
             res.raise_for_status()
 
@@ -42,15 +53,22 @@ class Command(BaseCommand):
                 img_res.raise_for_status()
                 logging.info(f'Downloading {basename}')
 
-                # Save the image to ./xkcd. (from ATBS)
-                filepath = os.path.join('xkcd/static/img', basename)
+                # Save the image to disk
+                filepath = os.path.join(TEMP_IMAGE_DIRECTORY, basename)
                 img_file = open(filepath, 'wb')
                 for chunk in img_res.iter_content(100000):
                     img_file.write(chunk)
                 img_file.close()
 
+                # Upload to spaces
+                transfer.upload_file(filepath, 'comic', f'xkcd/{basename}')
+                client.put_object_acl(ACL='public-read', Bucket=AWS_SPACES_BUCKET, Key=f'xkcd/{basename}')
+
+                # Delete the temp image file saved to disk
+                os.remove(filepath)
+
             except requests.exceptions.HTTPError:
-                logging.info(f'Could not find xkcd {number}')
+                logging.info(f'Could not find xkcd {comic_number}')
                 comic_number -= 1
                 continue
 
