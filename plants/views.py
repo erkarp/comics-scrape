@@ -1,6 +1,7 @@
 from django.db import IntegrityError
 from rest_framework import viewsets, status
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
 from plants.models import Plant
@@ -21,6 +22,7 @@ class PlantViewSet(viewsets.ModelViewSet):
 
 
 @api_view(['POST'])
+@permission_classes([IsAuthenticated])
 def water_plant(request):
     if 'dates' in request.data:
         plant = Plant.objects.get(pk=request.data['plant'])
