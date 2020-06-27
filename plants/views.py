@@ -1,4 +1,6 @@
 from django.db import IntegrityError
+from django.http import HttpResponse
+from django.views.decorators.csrf import ensure_csrf_cookie
 from rest_framework import viewsets, status
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
@@ -6,6 +8,11 @@ from rest_framework.response import Response
 
 from plants.models import Plant
 from plants.serializers import WateringSerializer, PlantListSerializer, PlantViewSerializer
+
+
+@ensure_csrf_cookie
+def set_csrf_cookie(request):
+    return HttpResponse()
 
 
 class PlantViewSet(viewsets.ModelViewSet):

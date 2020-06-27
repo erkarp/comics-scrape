@@ -27,12 +27,11 @@ DEBUG = True
 
 ALLOWED_HOSTS = ['*']
 
-CORS_ORIGIN_WHITELIST = (
-    'localhost:8080',
-    'localhost:8081',
-)
 
-# Application definition
+SESSION_COOKIE_SAMESITE = None
+
+CORS_ALLOW_CREDENTIALS = True
+
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -98,6 +97,16 @@ AUTH_PASSWORD_VALIDATORS = [
         'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
     },
 ]
+
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework.authentication.SessionAuthentication',
+    ),
+    # 'DEFAULT_PERMISSION_CLASSES': (
+    #     'rest_framework.permissions.IsAuthenticated',
+    # )
+}
 
 
 # Internationalization
