@@ -1,17 +1,18 @@
 from django.db import IntegrityError
 from rest_framework import viewsets, status
 from rest_framework.decorators import api_view, permission_classes
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
 
 from plants.models import Plant
-from plants.serializers import WateringSerializer, PlantListSerializer, PlantViewSerializer
+from plants.serializers import WateringSerializer, PlantListSerializer, PlantViewSerializer, UserSerializer
 
 
 class PlantViewSet(viewsets.ModelViewSet):
     """
     API endpoint that allows plants to be viewed or edited.
     """
+    permission_classes = ([AllowAny])
     queryset = Plant.objects.all()  # .order_by('name')
 
     def get_serializer_class(self):
@@ -42,3 +43,13 @@ def water_plant(request):
             return Response(serializer.errors, status=status.HTTP_405_METHOD_NOT_ALLOWED)
 
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(['GET'])
+def current_user(request):
+    """
+    Determine the current user by their token, and return their data
+    """
+
+    serializer = UserSerializer(request.user)
+    return Response(serializer.data)
