@@ -138,7 +138,7 @@ class Image(models.Model):
 
 class Watering(models.Model):
     plant = models.ForeignKey(Plant, related_name='watered', on_delete=models.CASCADE)
-    date = models.DateField(default=timezone.now)
+    date = models.DateField(default=datetime.date.today)
     fertilized = models.BooleanField(default=False)
 
     def __str__(self):
