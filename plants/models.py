@@ -1,7 +1,6 @@
 import datetime
 
 from django.db import models, IntegrityError
-from django.utils import timezone
 
 
 class Fertilizer(models.Model):

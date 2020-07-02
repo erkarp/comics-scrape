@@ -1,5 +1,6 @@
 import datetime
 
+from django.contrib.auth.models import User
 from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase
@@ -10,7 +11,10 @@ from plants.models import Plant, Species, Lighting, Spot, Watering
 class PlantTests(APITestCase):
 
     def setUp(self):
-        """Define the test client and other test variables."""
+        # Create a user and log in
+        user = User.objects.create_user('username', 'password')
+        self.client.force_authenticate(user)
+
         lighting = Lighting(description='bright')
         lighting.save()
 
@@ -59,7 +63,7 @@ class PlantTests(APITestCase):
     def test_time_till_next_watering(self):
         water = Watering(plant=self.plant, date=(datetime.date.today() - datetime.timedelta(days=1)))
         water.save()
-        self.assertEqual(self.plant.time_till_next_watering, 8)
+        self.assertEqual(self.plant.time_till_next_watering, 6)
 
     def test_water_plant(self):
         data = {
@@ -76,6 +80,11 @@ class PlantTests(APITestCase):
         }
         response = self.client.post(reverse('water-plant'), data)
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+    def test_water_plant__today(self):
+        self.client.post(reverse('water-plant'), {"plant": self.plant.id})
+        plant_response = self.client.get(reverse('plant-detail', kwargs={'pk': self.plant.pk}), format='json')
+        self.assertEqual(plant_response.data['latest_watering_date'], datetime.date.today())
 
     def test_record_multiple_watering(self):
         success, message = self.plant.record_multiple_watering("June 1 2005,June 2 2006,June 3 2007")
