@@ -1,11 +1,20 @@
 from django.contrib import admin
+from django.forms import ModelForm
 
 from plants.models import Plant, Species, Fertilizer, Lighting, Shop, Spot, Watering
+
+
+class AlwaysChangedModelForm(ModelForm):
+    def has_changed(self):
+        """ Should returns True if data differs from initial.
+        By always returning true even unchanged inlines will get validated and saved."""
+        return True
 
 
 class WaterInline(admin.TabularInline):
     model = Watering
     extra = 0
+    form = AlwaysChangedModelForm
 
 
 class PlantAdmin(admin.ModelAdmin):
