@@ -4,6 +4,9 @@ from django.forms import ModelForm
 from plants.models import Plant, Species, Fertilizer, Lighting, Shop, Spot, Watering
 
 
+admin.site.disable_action('delete_selected')
+
+
 class AlwaysChangedModelForm(ModelForm):
     def has_changed(self):
         """ Should returns True if data differs from initial.
@@ -17,9 +20,18 @@ class WaterInline(admin.TabularInline):
     form = AlwaysChangedModelForm
 
 
+def water(PlantAdmin, request, queryset):
+    watering_objects = [Watering(plant=plant) for plant in queryset]
+    Watering.objects.bulk_create(watering_objects)
+
+
+water.short_description = 'Water selected plants'
+
+
 class PlantAdmin(admin.ModelAdmin):
     search_fields = ('display_name', 'species__name', 'spot__name')
     inlines = [WaterInline]
+    actions = [water]
 
 
 class SpeciesAdmin(admin.ModelAdmin):

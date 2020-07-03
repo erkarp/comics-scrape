@@ -94,6 +94,9 @@ class Plant(models.Model):
     def time_till_next_watering(self):
         return -(datetime.date.today() - self.next_watering_avg).days
 
+    class Meta:
+        ordering = ['display_name', 'species__name']
+
     def __str__(self):
         return self.name
 
