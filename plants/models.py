@@ -33,7 +33,15 @@ class Species(models.Model):
         verbose_name_plural = 'species'
 
 
+class Room(models.Model):
+    name = models.CharField(max_length=225)
+
+    def __str__(self):
+        return self.name
+
+
 class Spot(models.Model):
+    room = models.ForeignKey(Room, related_name="spots", on_delete=models.PROTECT)
     name = models.CharField(max_length=255)
     lighting = models.ForeignKey(Lighting, on_delete=models.PROTECT)
 
@@ -56,7 +64,6 @@ class Plant(models.Model):
     display_name = models.CharField(max_length=255, blank=True)
     spot = models.ForeignKey(Spot, related_name="spot", on_delete=models.PROTECT)
     shop = models.ForeignKey(Shop, on_delete=models.PROTECT, blank=True, null=True)
-    purchase_date = models.DateField(default=datetime.date.today)
 
     @property
     def name(self):

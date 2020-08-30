@@ -1,8 +1,7 @@
 from django.contrib import admin
 from django.forms import ModelForm
 
-from plants.models import Plant, Species, Fertilizer, Lighting, Shop, Spot, Watering
-
+from plants.models import Plant, Species, Fertilizer, Lighting, Shop, Spot, Watering, Room
 
 admin.site.disable_action('delete_selected')
 
@@ -29,7 +28,7 @@ water.short_description = 'Water selected plants'
 
 
 class PlantAdmin(admin.ModelAdmin):
-    search_fields = ('display_name', 'species__name', 'spot__name')
+    search_fields = ('display_name', 'species__name', 'spot__name', 'spot__room__name')
     inlines = [WaterInline]
     actions = [water]
 
@@ -59,9 +58,14 @@ class SpotAdmin(admin.ModelAdmin):
     list_display = ('name',)
 
 
+class RoomAdmin(admin.ModelAdmin):
+    list_display = ('name',)
+
+
 admin.site.register(Plant, PlantAdmin)
 admin.site.register(Species, SpeciesAdmin)
 admin.site.register(Fertilizer, FertilizerAdmin)
 admin.site.register(Lighting, LightingAdmin)
 admin.site.register(Shop, ShopAdmin)
 admin.site.register(Spot, SpotAdmin)
+admin.site.register(Room, RoomAdmin)
