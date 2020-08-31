@@ -24,13 +24,19 @@ def water(PlantAdmin, request, queryset):
     Watering.objects.bulk_create(watering_objects)
 
 
-water.short_description = 'Water selected plants'
+def water_and_fertilize(PlantAdmin, request, queryset):
+    watering_objects = [Watering(plant=plant, fertilized=True) for plant in queryset]
+    Watering.objects.bulk_create(watering_objects)
+
+
+water.short_description = 'Water'
+water_and_fertilize.short_description = 'Water and fertilize'
 
 
 class PlantAdmin(admin.ModelAdmin):
     search_fields = ('display_name', 'species__name', 'spot__name', 'spot__room__name')
     inlines = [WaterInline]
-    actions = [water]
+    actions = [water, water_and_fertilize]
 
 
 class SpeciesAdmin(admin.ModelAdmin):
