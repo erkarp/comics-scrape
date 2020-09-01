@@ -5,7 +5,7 @@ from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase
 
-from plants.models import Plant, Species, Lighting, Spot, Watering
+from plants.models import Plant, Species, Lighting, Room, Spot, Watering
 
 
 class PlantTests(APITestCase):
@@ -18,7 +18,10 @@ class PlantTests(APITestCase):
         lighting = Lighting(description='bright')
         lighting.save()
 
-        spot = Spot(lighting=lighting)
+        room = Room(name='first room')
+        room.save()
+
+        spot = Spot(lighting=lighting, room=room)
         spot.save()
 
         species = Species(
