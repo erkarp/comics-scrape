@@ -14,7 +14,7 @@ class SpeciesSerializer(serializers.ModelSerializer):
 class WateringSerializer(serializers.ModelSerializer):
     class Meta:
         model = Watering
-        fields = ['plant', 'date', 'fertilized']
+        fields = ['date', 'fertilized']
 
 
 class PlantListSerializer(serializers.ModelSerializer):
@@ -28,7 +28,7 @@ class PlantListSerializer(serializers.ModelSerializer):
 
 class PlantViewSerializer(serializers.ModelSerializer):
     species = SpeciesSerializer()
-    watered = serializers.StringRelatedField(many=True)
+    watered = WateringSerializer(many=True)
     spot = serializers.StringRelatedField()
 
     class Meta:
