@@ -1,11 +1,10 @@
-from django.db import IntegrityError
 from rest_framework import viewsets, status
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
 from plants.models import Plant
-from plants.serializers import WateringSerializer, PlantListSerializer, PlantViewSerializer
+from plants.serializers import PlantListSerializer, PlantViewSerializer
 
 
 class PlantViewSet(viewsets.ModelViewSet):
@@ -24,8 +23,9 @@ class PlantViewSet(viewsets.ModelViewSet):
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def water_plant(request):
+    plant = Plant.objects.get(pk=request.data['plant'])
+
     if 'dates' in request.data:
-        plant = Plant.objects.get(pk=request.data['plant'])
         success, message = plant.record_multiple_watering(request.data['dates'])
 
         if success:
@@ -33,12 +33,5 @@ def water_plant(request):
         else:
             return Response(message, status=status.HTTP_400_BAD_REQUEST)
 
-    serializer = WateringSerializer(data=request.data)
-    if serializer.is_valid():
-        try:
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        except IntegrityError:
-            return Response(serializer.errors, status=status.HTTP_405_METHOD_NOT_ALLOWED)
-
-    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    plant.water()
+    return Response('water tried', status=status.HTTP_201_CREATED)

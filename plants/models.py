@@ -107,6 +107,12 @@ class Plant(models.Model):
     def __str__(self):
         return self.name
 
+    def water(self):
+        Watering.objects.create(
+            plant=self,
+            date=datetime.date.today()
+        )
+
     def record_multiple_watering(self, dates: str) -> (bool, str):
         dates = dates.split(',')
         watering_objects = []
