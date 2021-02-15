@@ -8,7 +8,8 @@ class SpeciesSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Species
-        fields = ['days_between_watering_min', 'days_between_watering_max', 'lighting']
+        fields = ['days_between_watering_min', 'days_between_watering_max', 'lighting',
+                  'fertilize_frequency', 'fertilizer']
 
 
 class WateringSerializer(serializers.ModelSerializer):
