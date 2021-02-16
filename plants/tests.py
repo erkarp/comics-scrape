@@ -89,6 +89,11 @@ class PlantTests(APITestCase):
         plant_response = self.client.get(reverse('plant-detail', kwargs={'pk': self.plant.pk}), format='json')
         self.assertEqual(plant_response.data['latest_watering_date'], datetime.date.today())
 
+    def test_water_plant__fertilize(self):
+        self.client.post(reverse('water-plant'), {"plant": self.plant.id, "fertilize": True})
+        plant_response = self.client.get(reverse('plant-detail', kwargs={'pk': self.plant.pk}), format='json')
+        self.assertEqual(plant_response.data['watered'][0].get('fertilized'), True)
+
     def test_record_multiple_watering(self):
         success, message = self.plant.record_multiple_watering("June 1 2005,June 2 2006,June 3 2007")
         self.assertTrue(success)

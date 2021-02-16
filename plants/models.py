@@ -107,10 +107,11 @@ class Plant(models.Model):
     def __str__(self):
         return self.name
 
-    def water(self):
+    def water(self, fertilize=False):
         Watering.objects.create(
             plant=self,
-            date=datetime.date.today()
+            date=datetime.date.today(),
+            fertilized=fertilize,
         )
 
     def record_multiple_watering(self, dates: str) -> (bool, str):

@@ -33,5 +33,7 @@ def water_plant(request):
         else:
             return Response(message, status=status.HTTP_400_BAD_REQUEST)
 
-    plant.water()
+    fertilize = request.data['fertilize'] if 'fertilize' in request.data else False
+    plant.water(fertilize)
+
     return Response('water tried', status=status.HTTP_201_CREATED)
