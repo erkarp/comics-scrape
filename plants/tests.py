@@ -23,6 +23,7 @@ class PlantTests(APITestCase):
 
         spot = Spot(lighting=lighting, room=room)
         spot.save()
+        self.spot = spot
 
         species = Species(
             name='jade',
@@ -31,6 +32,7 @@ class PlantTests(APITestCase):
             days_between_watering_max=9
         )
         species.save()
+        self.species = species
 
         self.plant = Plant(
             species=species,
@@ -117,3 +119,23 @@ class PlantTests(APITestCase):
 
         self.assertFalse(success)
         self.assertEqual(message, 'Already watered on 2006-06-02')
+
+    def test_unwatered_plant_returns_expected_properties(self):
+        ogre_ears = Plant(
+            species=self.species,
+            spot=self.spot,
+            display_name='ogre ears'
+        )
+        ogre_ears.save()
+
+        response = self.client.get(reverse('plant-list'), format='json')
+
+        for plant in response.data:
+            if plant.get('name') == 'ogre ears':
+                self.assertIn('latest_watering_date', plant)
+                self.assertIn('next_watering_min', plant)
+                self.assertIn('next_watering_max', plant)
+                self.assertIn('days_till_next_watering_min', plant)
+                self.assertIn('days_till_next_watering_max', plant)
+                self.assertIn('time_till_next_watering', plant)
+                break

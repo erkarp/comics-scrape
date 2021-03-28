@@ -71,35 +71,40 @@ class Plant(models.Model):
 
     @property
     def latest_watering_date(self):
-        return self.watered.first().date
+        if self.watered.exists():
+            return self.watered.first().date
 
     @property
     def next_watering_min(self):
-        if self.latest_watering_date:
+        if self.watered.exists():
             return self.latest_watering_date + datetime.timedelta(days=self.species.days_between_watering_min)
 
     @property
     def next_watering_max(self):
-        if self.latest_watering_date:
+        if self.watered.exists():
             return self.latest_watering_date + datetime.timedelta(days=self.species.days_between_watering_max)
 
     @property
     def next_watering_avg(self):
-        if self.latest_watering_date:
+        if self.watered.exists():
             avg = (self.species.days_between_watering_min + self.species.days_between_watering_max)/2
             return self.latest_watering_date + datetime.timedelta(days=avg)
 
     @property
     def days_till_next_watering_min(self):
-        return -(datetime.date.today() - self.next_watering_min).days
+        if self.watered.exists():
+            return -(datetime.date.today() - self.next_watering_min).days
 
     @property
     def days_till_next_watering_max(self):
-        return -(datetime.date.today() - self.next_watering_max).days
+        if self.watered.exists():
+            return -(datetime.date.today() - self.next_watering_max).days
 
     @property
     def time_till_next_watering(self):
-        return -(datetime.date.today() - self.next_watering_avg).days
+        if self.watered.exists():
+            return -(datetime.date.today() - self.next_watering_avg).days
+        return -999
 
     class Meta:
         ordering = ['display_name', 'species__name']
